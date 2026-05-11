@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>304 사진 빙고</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;min-height:100vh}
+.app{max-width:680px;margin:0 auto;padding:1rem}
+.screen{display:none}.screen.active{display:block}
+.header{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.role-badge{font-size:12px;padding:3px 10px;border-radius:6px;background:#e8f0fb;color:#185FA5}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.card h2{font-size:16px;font-weight:500;margin-bottom:1rem;color:#111}
+.btn{border:1px solid #ddd;background:transparent;border-radius:8px;padding:8px 16px;font-size:14px;cursor:pointer;color:#111;transition:background 0.15s}
+.btn:hover{background:#f0f0f0}
+.btn-primary{background:#185FA5;color:#fff;border-color:#185FA5}
+.btn-primary:hover{background:#0C447C}
+.btn-success{background:#3B6D11;color:#fff;border-color:#3B6D11;font-size:12px;padding:4px 10px}
+.btn-danger{background:#A32D2D;color:#fff;border-color:#A32D2D;font-size:12px;padding:4px 10px}
+input,textarea{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:#fff;color:#111;font-family:inherit}
+input:focus,textarea:focus{outline:none;border-color:#185FA5}
+.login-wrap{display:flex;gap:1rem;margin-top:1.5rem}
+.login-card{flex:1;border:1px solid #e5e5e5;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;background:#fff;transition:border-color 0.15s}
+.login-card:hover{border-color:#185FA5}
+.login-card i{font-size:32px;margin-bottom:12px;display:block;color:#888}
+.login-card h3{font-size:15px;font-weight:500;margin-bottom:6px;color:#111}
+.login-card p{font-size:13px;color:#888}
+.bingo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:1rem}
+.bingo-cell{border:1px solid #ddd;border-radius:8px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:6px;text-align:center;position:relative;overflow:hidden;background:#fff}
+.bingo-cell:hover{border-color:#185FA5}
+.bingo-cell.approved{border-color:#3B6D11;background:#EAF3DE}
+.bingo-cell.pending{border-color:#BA7517;background:#FAEEDA}
+.bingo-cell.rejected{border-color:#A32D2D;background:#FCEBEB}
+.bingo-cell.bingo-line-cell{border-color:#185FA5;background:#E6F1FB}
+.bingo-cell .cell-text{font-size:10px;color:#888;line-height:1.3}
+.bingo-cell .cell-img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:8px;opacity:0.7}
+.bingo-cell .cell-label{position:relative;z-index:1;font-size:10px;color:#111;font-weight:500;line-height:1.3}
+.bingo-cell .status-icon{position:absolute;top:3px;right:3px;font-size:12px;z-index:2}
+.bingo-announce{background:#E6F1FB;border-left:3px solid #185FA5;padding:6px 10px;border-radius:0 8px 8px 0;font-size:13px;color:#0C447C;margin-bottom:6px}
+.bingo-complete{background:#EAF3DE;border-left:3px solid #3B6D11;padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px;color:#27500A;margin-bottom:8px;font-weight:500}
+.chicken-progress{display:flex;align-items:center;gap:6px}
+.chicken{font-size:22px;transition:opacity 0.3s}
+.chicken.filled{opacity:1}
+.chicken.empty{opacity:0.2}
+.group-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tag{display:inline-flex;align-items:center;gap:4px;background:#f5f5f5;border:1px solid #e5e5e5;border-radius:6px;padding:3px 10px;font-size:13px;color:#555}
+.tag button{background:none;border:none;cursor:pointer;color:#888;font-size:14px;padding:0}
+.group-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.tab{border:1px solid #e5e5e5;border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;background:#f5f5f5;color:#555}
+.tab.active{background:#185FA5;color:#fff;border-color:#185FA5}
+.photo-review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.photo-item{border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;background:#f9f9f9}
+.photo-item .photo-info{padding:8px}
+.photo-item .photo-actions{display:flex;gap:6px}
+.status-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px}
+.status-pending{background:#FAEEDA;color:#854F0B}
+.status-approved{background:#EAF3DE;color:#3B6D11}
+.status-rejected{background:#FCEBEB;color:#A32D2D}
+.bingo-edit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:#fff;border-radius:12px;padding:1.5rem;width:90%;max-width:340px;border:1px solid #e5e5e5}
+.modal h3{font-size:16px;font-weight:500;margin-bottom:1rem;color:#111}
+.modal-actions{display:flex;gap:8px;margin-top:1rem;justify-content:flex-end}
+.hidden{display:none}
+.text-sm{font-size:13px;color:#888}
+.err{font-size:13px;color:#A32D2D;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="screen active" id="screen-home">
+  <div style="text-align:center;padding:2rem 0 1rem">
+    <div style="font-size:40px;margin-bottom:8px">🍗</div>
+    <h1 style="font-size:22px;font-weight:500;margin-bottom:6px;color:#111">304 사진 빙고</h1>
+    <p class="text-sm">역할을 선택해 시작하세요</p>
+  </div>
+  <div class="login-wrap">
+    <div class="login-card" onclick="goTeacherLogin()">
+      <i class="ti ti-school"></i><h3>선생님</h3><p>빙고 설정 및<br>사진 확인</p>
+    </div>
+    <div class="login-card" onclick="showScreen('screen-student-login')">
+      <i class="ti ti-user-circle"></i><h3>학생</h3><p>사진 업로드 및<br>빙고 달성</p>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-teacher-login">
+  <div class="card">
+    <h2>선생님 로그인</h2>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input type="password" id="teacher-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')checkTeacherPw()">
+      <p class="err hidden" id="teacher-pw-err">비밀번호가 틀렸습니다.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="showScreen('screen-home')" style="flex:1">뒤로</button>
+        <button class="btn btn-primary" onclick="checkTeacherPw()" style="flex:2">입장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-student-login">
+  <div class="card">
+    <h2>학생 접속</h2>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input type="text" id="input-group" placeholder="모둠 이름 (예: 1모둠)" onkeydown="if(event.key==='Enter')goStudent()">
+      <p class="err hidden" id="student-err"></p>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="showScreen('screen-home')" style="flex:1">뒤로</button>
+        <button class="btn btn-primary" onclick="goStudent()" style="flex:2">입장하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-student-bingo">
+  <div class="header">
+    <div>
+      <div style="font-size:13px;color:#888" id="student-group-label"></div>
+      <div style="font-size:15px;font-weight:500;color:#111">304 사진 빙고</div>
+    </div>
+    <span class="role-badge">학생</span>
+  </div>
+  <div class="card">
+    <div class="progress-row">
+      <div class="chicken-progress">
+        <span class="chicken empty" id="chicken-0">🍗</span>
+        <span class="chicken empty" id="chicken-1">🍗</span>
+        <span class="chicken empty" id="chicken-2">🍗</span>
+      </div>
+      <span class="text-sm" id="student-progress-text">빙고 0줄 완성</span>
+    </div>
+    <div id="bingo-complete-wrap"></div>
+    <div id="bingo-announce-wrap" style="margin-bottom:6px"></div>
+    <div class="bingo-grid" id="student-bingo-grid"></div>
+    <p class="text-sm" style="margin-top:8px;text-align:center">칸을 눌러 사진을 업로드하세요</p>
+  </div>
+  <button class="btn" onclick="showScreen('screen-home')" style="width:100%">홈으로</button>
+</div>
+
+<div id="upload-modal-wrap" class="hidden">
+  <div class="modal-bg">
+    <div class="modal">
+      <h3 id="modal-cell-title"></h3>
+      <p class="text-sm" id="modal-cell-desc" style="margin-bottom:12px"></p>
+      <input type="file" accept="image/*" id="file-input" onchange="previewPhoto(event)">
+      <div id="preview-wrap" class="hidden" style="margin-top:10px">
+        <img id="preview-img" style="width:100%;border-radius:8px;max-height:160px;object-fit:cover">
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeUploadModal()">취소</button>
+        <button class="btn btn-primary" id="upload-btn" onclick="submitPhoto()">제출하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-teacher">
+  <div class="header">
+    <div style="font-size:15px;font-weight:500;color:#111">선생님 관리</div>
+    <span class="role-badge">선생님</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem">
+    <button class="btn" id="tab-setup" onclick="showTeacherTab('setup')" style="font-size:12px">빙고 설정</button>
+    <button class="btn" id="tab-groups" onclick="showTeacherTab('groups')" style="font-size:12px">모둠 관리</button>
+    <button class="btn" id="tab-review" onclick="showTeacherTab('review')" style="font-size:12px">사진 확인</button>
+  </div>
+  <div id="teacher-setup" class="card">
+    <h2>빙고 칸 주제 설정</h2>
+    <div class="bingo-edit-grid" id="edit-grid"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="saveSetup()">저장하기</button>
+  </div>
+  <div id="teacher-groups" class="card hidden">
+    <h2>모둠 관리</h2>
+    <p class="text-sm" style="margin-bottom:10px">등록된 모둠만 앱에 접속할 수 있습니다.</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="text" id="new-group-input" placeholder="모둠 이름 입력" style="flex:1" onkeydown="if(event.key==='Enter')addGroup()">
+      <button class="btn btn-primary" onclick="addGroup()" style="white-space:nowrap">추가</button>
+    </div>
+    <div class="group-tags" id="group-tags-wrap"></div>
+    <p class="text-sm" id="no-groups-msg" style="text-align:center;margin-top:8px"></p>
+    <hr style="border:none;border-top:1px solid #e5e5e5;margin:12px 0">
+    <p class="text-sm" style="margin-bottom:6px">선생님 비밀번호 변경</p>
+    <div style="display:flex;gap:8px">
+      <input type="password" id="new-pw-input" placeholder="새 비밀번호" style="flex:1">
+      <button class="btn" onclick="changePw()" style="white-space:nowrap">변경</button>
+    </div>
+  </div>
+  <div id="teacher-review" class="card hidden">
+    <h2>제출된 사진 확인</h2>
+    <div class="group-tabs" id="group-tabs"></div>
+    <div class="photo-review-grid" id="photo-review-grid"></div>
+    <p class="text-sm" style="text-align:center;margin-top:8px" id="no-photos-msg"></p>
+  </div>
+  <button class="btn" onclick="showScreen('screen-home')" style="width:100%;margin-top:4px">홈으로</button>
+</div>
+</div>
+
+<script>
+const STORAGE_KEY='bingo304_v1';
+function loadState(){try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(window._S));}catch(e){}}
+
+const DEFAULT_TOPICS=["선배님과 악수","직업 도구 들기","직업명 써서 인증샷","진로 상담 중","유니폼 입어보기","관련 책 들고 찍기","팀원 전체 단체사진","진로 포스터 앞에서","담당자에게 질문하기","체험 활동 중","작업 장면 찍기","기관 입구에서","기념품 들고 찍기","관련 장비 앞에서","체험 소감 적기","이름표 인증샷"];
+const saved=loadState();
+window._S=saved||{topics:[...DEFAULT_TOPICS],groups:[],photos:{},teacherPw:'1222'};
+if(!window._S.teacherPw) window._S.teacherPw='1222';
+
+window._currentGroup='';
+window._currentCell=-1;
+window._fileData=null;
+window._reviewGroup='';
+
+const LINES=[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15],[0,5,10,15],[3,6,9,12]];
+const LINE_NAMES=['1번 가로줄','2번 가로줄','3번 가로줄','4번 가로줄','1번 세로줄','2번 세로줄','3번 세로줄','4번 세로줄','대각선(↘)','대각선(↗)'];
+
+function calcLines(photos){return LINES.filter(l=>l.every(i=>photos[i]&&photos[i].status==='approved'));}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goTeacherLogin(){document.getElementById('teacher-pw').value='';document.getElementById('teacher-pw-err').classList.add('hidden');showScreen('screen-teacher-login');}
+function checkTeacherPw(){
+  if(document.getElementById('teacher-pw').value===window._S.teacherPw){renderEditGrid();showTeacherTab('setup');showScreen('screen-teacher');}
+  else document.getElementById('teacher-pw-err').classList.remove('hidden');
+}
+function goStudent(){
+  const grp=document.getElementById('input-group').value.trim();
+  const err=document.getElementById('student-err');
+  if(!grp){err.textContent='모둠 이름을 입력해주세요.';err.classList.remove('hidden');return;}
+  if(!window._S.groups.includes(grp)){err.textContent='등록되지 않은 모둠 이름입니다.';err.classList.remove('hidden');return;}
+  err.classList.add('hidden');
+  window._currentGroup=grp;
+  document.getElementById('student-group-label').textContent=grp;
+  if(!window._S.photos[grp]) window._S.photos[grp]={};
+  renderStudentBingo();showScreen('screen-student-bingo');
+}
+function renderStudentBingo(){
+  const photos=window._S.photos[window._currentGroup]||{};
+  const doneLines=calcLines(photos);
+  const lineSet=new Set(doneLines.flat());
+  const grid=document.getElementById('student-bingo-grid');grid.innerHTML='';
+  window._S.topics.forEach((topic,i)=>{
+    const ph=photos[i];const cell=document.createElement('div');cell.className='bingo-cell';
+    if(ph){
+      if(ph.status==='approved') cell.classList.add(lineSet.has(i)?'bingo-line-cell':'approved');
+      else if(ph.status==='pending') cell.classList.add('pending');
+      else cell.classList.add('rejected');
+      const img=document.createElement('img');img.src=ph.dataUrl;img.className='cell-img';cell.appendChild(img);
+      const lbl=document.createElement('div');lbl.className='cell-label';lbl.textContent=topic;cell.appendChild(lbl);
+      const icon=document.createElement('span');icon.className='status-icon';
+      icon.textContent=ph.status==='approved'?(lineSet.has(i)?'⭐':'✅'):ph.status==='rejected'?'❌':'⏳';cell.appendChild(icon);
+    } else {const t=document.createElement('div');t.className='cell-text';t.textContent=topic;cell.appendChild(t);}
+    cell.onclick=()=>openUploadModal(i,topic,ph);grid.appendChild(cell);
+  });
+  const n=doneLines.length;
+  for(let k=0;k<3;k++){const el=document.getElementById('chicken-'+k);el.className='chicken '+(k<Math.min(n,3)?'filled':'empty');}
+  document.getElementById('student-progress-text').textContent='빙고 '+n+'줄 완성';
+  const cw=document.getElementById('bingo-complete-wrap');const aw=document.getElementById('bingo-announce-wrap');
+  cw.innerHTML='';aw.innerHTML='';
+  if(n>=3){const d=document.createElement('div');d.className='bingo-complete';d.textContent='🎉 목표 달성! 치킨 3마리 완성!';cw.appendChild(d);}
+  doneLines.forEach(line=>{const d=document.createElement('div');d.className='bingo-announce';const idx=LINES.findIndex(l=>l.join()===line.join());d.textContent='⭐ '+LINE_NAMES[idx]+' 빙고!';aw.appendChild(d);});
+}
+function openUploadModal(i,topic,existing){
+  window._currentCell=i;
+  document.getElementById('modal-cell-title').textContent=topic;
+  document.getElementById('file-input').value='';
+  document.getElementById('preview-wrap').classList.add('hidden');
+  window._fileData=null;
+  if(existing&&existing.status==='approved'){document.getElementById('modal-cell-desc').textContent='✅ 이미 승인된 사진입니다.';document.getElementById('upload-btn').disabled=true;}
+  else{document.getElementById('modal-cell-desc').textContent='이 칸에 맞는 사진을 올려주세요.';document.getElementById('upload-btn').disabled=false;}
+  if(existing){document.getElementById('preview-img').src=existing.dataUrl;document.getElementById('preview-wrap').classList.remove('hidden');window._fileData=existing.dataUrl;}
+  document.getElementById('upload-modal-wrap').classList.remove('hidden');
+}
+function closeUploadModal(){document.getElementById('upload-modal-wrap').classList.add('hidden');window._fileData=null;}
+function previewPhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{window._fileData=ev.target.result;document.getElementById('preview-img').src=ev.target.result;document.getElementById('preview-wrap').classList.remove('hidden');};r.readAsDataURL(f);
+}
+function submitPhoto(){
+  if(!window._fileData){alert('사진을 선택해주세요');return;}
+  if(!window._S.photos[window._currentGroup]) window._S.photos[window._currentGroup]={};
+  window._S.photos[window._currentGroup][window._currentCell]={dataUrl:window._fileData,status:'pending'};
+  saveState();closeUploadModal();renderStudentBingo();
+}
+function showTeacherTab(tab){
+  ['setup','groups','review'].forEach(t=>{
+    document.getElementById('teacher-'+t).classList.toggle('hidden',t!==tab);
+    document.getElementById('tab-'+t).style.background=t===tab?'#f0f0f0':'transparent';
+  });
+  if(tab==='review') renderReview();
+  if(tab==='groups') renderGroupTags();
+}
+function renderEditGrid(){
+  const g=document.getElementById('edit-grid');g.innerHTML='';
+  window._S.topics.forEach((t,i)=>{
+    const c=document.createElement('div');const ta=document.createElement('textarea');ta.value=t;ta.id='topic-'+i;
+    ta.style.cssText='width:100%;height:56px;font-size:10px;padding:4px;resize:none;border:1px solid #ddd;border-radius:6px;background:#fff;color:#111';
+    c.appendChild(ta);g.appendChild(c);
+  });
+}
+function saveSetup(){
+  for(let i=0;i<16;i++){const v=document.getElementById('topic-'+i).value.trim();if(v)window._S.topics[i]=v;}
+  saveState();alert('저장되었습니다!');
+}
+function renderGroupTags(){
+  const wrap=document.getElementById('group-tags-wrap');const msg=document.getElementById('no-groups-msg');
+  wrap.innerHTML='';
+  if(!window._S.groups.length){msg.textContent='등록된 모둠이 없습니다.';return;}
+  msg.textContent='';
+  window._S.groups.forEach(g=>{
+    const tag=document.createElement('div');tag.className='tag';
+    tag.innerHTML=g+' <button onclick="removeGroup(\''+g.replace(/'/g,"\\'")+'\')">×</button>';wrap.appendChild(tag);
+  });
+}
+function addGroup(){
+  const inp=document.getElementById('new-group-input');const name=inp.value.trim();if(!name)return;
+  if(window._S.groups.includes(name)){alert('이미 등록된 모둠입니다.');return;}
+  window._S.groups.push(name);saveState();inp.value='';renderGroupTags();
+}
+function removeGroup(name){window._S.groups=window._S.groups.filter(g=>g!==name);saveState();renderGroupTags();}
+function changePw(){
+  const pw=document.getElementById('new-pw-input').value.trim();if(!pw){alert('비밀번호를 입력하세요.');return;}
+  window._S.teacherPw=pw;saveState();document.getElementById('new-pw-input').value='';alert('변경되었습니다.');
+}
+function renderReview(){
+  const tabsEl=document.getElementById('group-tabs');
+  const groups=window._S.groups.filter(g=>window._S.photos[g]&&Object.keys(window._S.photos[g]).length>0);
+  tabsEl.innerHTML='';
+  if(!groups.length){document.getElementById('photo-review-grid').innerHTML='';document.getElementById('no-photos-msg').textContent='아직 제출된 사진이 없습니다.';return;}
+  document.getElementById('no-photos-msg').textContent='';
+  if(!groups.includes(window._reviewGroup)) window._reviewGroup=groups[0];
+  groups.forEach(function(gk){
+    const btn=document.createElement('div');btn.className='tab'+(gk===window._reviewGroup?' active':'');btn.textContent=gk;
+    btn.onclick=function(){window._reviewGroup=gk;renderReview();};tabsEl.appendChild(btn);
+  });
+  renderGroupPhotos(window._reviewGroup);
+}
+function renderGroupPhotos(gk){
+  const photos=window._S.photos[gk]||{};const grid=document.getElementById('photo-review-grid');grid.innerHTML='';
+  const keys=Object.keys(photos);
+  if(!keys.length){document.getElementById('no-photos-msg').textContent='이 모둠은 아직 제출된 사진이 없습니다.';return;}
+  document.getElementById('no-photos-msg').textContent='';
+  keys.forEach(function(ci){
+    const ph=photos[ci];const topic=window._S.topics[ci]||'칸 '+(parseInt(ci)+1);
+    const item=document.createElement('div');item.className='photo-item';
+    const img=document.createElement('img');img.src=ph.dataUrl;img.style.cssText='width:100%;height:110px;object-fit:cover';item.appendChild(img);
+    const info=document.createElement('div');info.className='photo-info';
+    const badge=ph.status==='approved'?'<span class="status-badge status-approved">승인됨</span>':ph.status==='rejected'?'<span class="status-badge status-rejected">거절됨</span>':'<span class="status-badge status-pending">검토 중</span>';
+    info.innerHTML='<p style="font-size:12px;margin-bottom:6px"><strong style="color:#111">'+topic+'</strong> '+badge+'</p>';
+    if(ph.status==='pending'){
+      const acts=document.createElement('div');acts.className='photo-actions';
+      const ok=document.createElement('button');ok.className='btn btn-success';ok.textContent='✓ 승인';
+      ok.onclick=function(){ph.status='approved';saveState();renderGroupPhotos(gk);};
+      const no=document.createElement('button');no.className='btn btn-danger';no.textContent='✕ 거절';
+      no.onclick=function(){ph.status='rejected';saveState();renderGroupPhotos(gk);};
+      acts.appendChild(ok);acts.appendChild(no);info.appendChild(acts);
+    }
+    item.appendChild(info);grid.appendChild(item);
+  });
+}
+</script>
+</body>
+</html>
